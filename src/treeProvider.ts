@@ -3,7 +3,7 @@ import * as h from './hierarchy';
 import { passesFilter, matchesRuntimeFilter, maxDepth } from './filter';
 
 function showSignatures(): boolean {
-  return vscode.workspace.getConfiguration('cCallHierarchy').get<boolean>('showSignatures', true);
+  return vscode.workspace.getConfiguration('cCallHierarchyReferences').get<boolean>('showSignatures', true);
 }
 
 type NodeKind = 'root' | 'call';
@@ -145,7 +145,7 @@ export class CallTreeProvider implements vscode.TreeDataProvider<CallNode> {
     // real (see nodeTarget for how the location is chosen).
     const t = nodeTarget(node);
     ti.command = {
-      command: 'cCallHierarchy.openReference',
+      command: 'cCallHierarchyReferences.openReference',
       title: 'Open',
       arguments: [t.uri, t.range],
     };

@@ -23,7 +23,7 @@ function normKey(fsPath: string): string {
 
 /** Extra include search roots from settings, resolved against each workspace folder. */
 function configuredIncludeDirs(): string[] {
-  const cfg = vscode.workspace.getConfiguration('cCallHierarchy').get<string[]>('includePaths', []);
+  const cfg = vscode.workspace.getConfiguration('cCallHierarchyReferences').get<string[]>('includePaths', []);
   const folders = vscode.workspace.workspaceFolders ?? [];
   const dirs: string[] = folders.map((f) => f.uri.fsPath);
   for (const p of cfg) {

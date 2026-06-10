@@ -11,7 +11,7 @@ export class GraphView {
       GraphView.panel.reveal(column);
     } else {
       GraphView.panel = vscode.window.createWebviewPanel(
-        'cCallHierarchy.graph',
+        'cCallHierarchyReferences.graph',
         'Call Graph',
         column,
         { enableScripts: true, retainContextWhenHidden: true },

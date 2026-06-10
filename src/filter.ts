@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { matchGlob, matchesQuery } from './textutil';
 
-const SECTION = 'cCallHierarchy';
-const RUNTIME_KEY = 'cCallHierarchy.runtimePathFilter';
+const SECTION = 'cCallHierarchyReferences';
+const RUNTIME_KEY = 'cCallHierarchyReferences.runtimePathFilter';
 
 export function excludeGlobs(): string[] {
   return vscode.workspace.getConfiguration(SECTION).get<string[]>('excludeGlobs', []);

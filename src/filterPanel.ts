@@ -12,7 +12,7 @@ export interface FilterPanelCallbacks {
  * search box plus read/write/decl toggle chips for the References view.
  */
 export class FilterPanelProvider implements vscode.WebviewViewProvider {
-  static readonly viewType = 'cCallHierarchy.filterPanel';
+  static readonly viewType = 'cCallHierarchyReferences.filterPanel';
 
   private view: vscode.WebviewView | undefined;
   private current = '';

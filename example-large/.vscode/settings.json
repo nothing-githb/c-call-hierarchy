@@ -1,5 +1,5 @@
 {
-  "cCallHierarchy.includePaths": [
+  "cCallHierarchyReferences.includePaths": [
     "include"
   ]
 }

@@ -3,6 +3,15 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.13]
+
+### Changed
+- Renamed the internal command / setting / view identifier prefix `cCallHierarchy.*` →
+  `cCallHierarchyReferences.*` to match the extension name. Settings keys (e.g.
+  `cCallHierarchyReferences.maxDepth`, `cCallHierarchyReferences.includePaths`) and command ids changed
+  accordingly. Pre-release, so no published users are affected — if you set any `cCallHierarchy.*` keys
+  locally, rename them to the new prefix.
+
 ## [0.1.12]
 
 ### Changed
@@ -132,6 +141,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.13]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.13
 [0.1.12]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.12
 [0.1.11]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.11
 [0.1.10]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.10

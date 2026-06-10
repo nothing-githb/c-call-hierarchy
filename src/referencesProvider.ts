@@ -337,7 +337,7 @@ export class ReferencesProvider implements vscode.TreeDataProvider<RefTreeNode> 
     }
     ti.tooltip = tip;
     ti.command = {
-      command: 'cCallHierarchy.openReference',
+      command: 'cCallHierarchyReferences.openReference',
       title: 'Open',
       arguments: [uri, range],
     };

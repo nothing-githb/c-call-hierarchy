@@ -17,14 +17,14 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
 
   // --- Call hierarchy view ---
   const tree = new CallTreeProvider();
-  const callView = vscode.window.createTreeView('cCallHierarchy.tree', {
+  const callView = vscode.window.createTreeView('cCallHierarchyReferences.tree', {
     treeDataProvider: tree,
     showCollapseAll: true,
   });
 
   // --- References view ---
   const refProvider = new ReferencesProvider(context.extensionUri);
-  const refView = vscode.window.createTreeView('cCallHierarchy.references', {
+  const refView = vscode.window.createTreeView('cCallHierarchyReferences.references', {
     treeDataProvider: refProvider,
     showCollapseAll: true,
   });
@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
   // --- Include hierarchy view ---
   const includeIndex = new IncludeIndex();
   const includeProvider = new IncludeTreeProvider(includeIndex);
-  const includeView = vscode.window.createTreeView('cCallHierarchy.includes', {
+  const includeView = vscode.window.createTreeView('cCallHierarchyReferences.includes', {
     treeDataProvider: includeProvider,
     showCollapseAll: true,
   });
@@ -84,7 +84,7 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
 
   const applyPathFilter = async (): Promise<void> => {
     const active = !!getRuntimeFilter();
-    await vscode.commands.executeCommand('setContext', 'cCallHierarchy.pathFilterActive', active);
+    await vscode.commands.executeCommand('setContext', 'cCallHierarchyReferences.pathFilterActive', active);
     tree.refresh();
     refProvider.refresh();
     includeProvider.refresh();
@@ -115,13 +115,13 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
   const syncCallDir = (): void => {
     const outgoing = tree.getDirection() === 'outgoing';
     callView.description = outgoing ? 'callees (outgoing)' : 'callers (incoming)';
-    void vscode.commands.executeCommand('setContext', 'cCallHierarchy.callOutgoing', outgoing);
+    void vscode.commands.executeCommand('setContext', 'cCallHierarchyReferences.callOutgoing', outgoing);
   };
   syncCallDir();
 
   context.subscriptions.push(
     // ---- Call hierarchy ----
-    vscode.commands.registerCommand('cCallHierarchy.showHierarchy', async () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.showHierarchy', async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         vscode.window.showInformationMessage('Open a C/C++ file and place the cursor on a symbol.');
@@ -142,15 +142,15 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
       }
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.toggleDirection', () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.toggleDirection', () => {
       tree.toggleDirection();
       syncCallDir();
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.refresh', () => tree.refresh()),
+    vscode.commands.registerCommand('cCallHierarchyReferences.refresh', () => tree.refresh()),
 
     // ---- References (read/write) ----
-    vscode.commands.registerCommand('cCallHierarchy.findReferences', async () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.findReferences', async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         return;
@@ -160,37 +160,37 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
         () => h.classifyReferences(editor.document.uri, editor.selection.active),
       );
       refProvider.setReferences(symbolNameAt(editor), classified);
-      await vscode.commands.executeCommand('cCallHierarchy.references.focus');
+      await vscode.commands.executeCommand('cCallHierarchyReferences.references.focus');
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.refreshReferences', () => refProvider.refresh()),
-    vscode.commands.registerCommand('cCallHierarchy.clearReferences', () => refProvider.clear()),
+    vscode.commands.registerCommand('cCallHierarchyReferences.refreshReferences', () => refProvider.refresh()),
+    vscode.commands.registerCommand('cCallHierarchyReferences.clearReferences', () => refProvider.clear()),
     // Select/preview: focus stays in the tree so you can keep browsing up/down.
     vscode.commands.registerCommand(
-      'cCallHierarchy.openReference',
+      'cCallHierarchyReferences.openReference',
       (uri: vscode.Uri, range: vscode.Range) =>
         revealAt(uri, range, { preserveFocus: true, preview: true }),
     ),
     // Explicit "open in editor": moves focus and opens a real (non-preview) tab.
     // Invoked from the inline node action, so it receives the CallNode.
-    vscode.commands.registerCommand('cCallHierarchy.openReferenceInEditor', (node: CallNode) => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.openReferenceInEditor', (node: CallNode) => {
       const t = nodeTarget(node);
       return revealAt(t.uri, t.range, { preserveFocus: false, preview: false });
     }),
-    vscode.commands.registerCommand('cCallHierarchy.toggleReferenceGrouping', () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.toggleReferenceGrouping', () => {
       refProvider.toggleGrouping();
       vscode.window.setStatusBarMessage(
         `References grouped by ${refProvider.getGrouping()}`,
         2000,
       );
     }),
-    vscode.commands.registerCommand('cCallHierarchy.filterReferenceKinds', async () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.filterReferenceKinds', async () => {
       await refProvider.promptKindFilter();
       filterPanel?.updateKinds();
     }),
 
     // ---- Include hierarchy ----
-    vscode.commands.registerCommand('cCallHierarchy.showIncludeHierarchy', async (arg?: unknown) => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.showIncludeHierarchy', async (arg?: unknown) => {
       const uri = uriFromArg(arg) ?? vscode.window.activeTextEditor?.document.uri;
       if (!uri) {
         vscode.window.showInformationMessage('Open or select a C/C++ file first.');
@@ -200,19 +200,19 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
         await ensureIndex('Scanning #include graph…');
       }
       includeProvider.setRoot(uri);
-      await vscode.commands.executeCommand('cCallHierarchy.includes.focus');
+      await vscode.commands.executeCommand('cCallHierarchyReferences.includes.focus');
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.toggleIncludeDirection', () =>
+    vscode.commands.registerCommand('cCallHierarchyReferences.toggleIncludeDirection', () =>
       includeProvider.toggleDirection(),
     ),
 
-    vscode.commands.registerCommand('cCallHierarchy.refreshIncludes', async () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.refreshIncludes', async () => {
       await ensureIndex('Rescanning #include graph…');
       includeProvider.refresh();
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.openIncludeGraph', async () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.openIncludeGraph', async () => {
       const root = includeProvider.getRootUri();
       if (!root) {
         vscode.window.showInformationMessage('Run "Show include hierarchy" first.');
@@ -226,7 +226,7 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
     }),
 
     // ---- Path filter (live: applies as you type, reverts on Escape) ----
-    vscode.commands.registerCommand('cCallHierarchy.setPathFilter', () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.setPathFilter', () => {
       const original = getRuntimeFilter();
       const input = vscode.window.createInputBox();
       input.title = 'Filter by name or path (contains, glob, or /regex/)';
@@ -268,12 +268,12 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
       input.show();
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.clearPathFilter', async () => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.clearPathFilter', async () => {
       setRuntimeFilter(undefined);
       await applyPathFilter();
     }),
 
-    vscode.commands.registerCommand('cCallHierarchy.filterToFolder', async (arg?: unknown) => {
+    vscode.commands.registerCommand('cCallHierarchyReferences.filterToFolder', async (arg?: unknown) => {
       const uri = uriFromArg(arg);
       if (!uri) {
         return;
@@ -295,15 +295,15 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
     // ---- React to settings ----
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (
-        e.affectsConfiguration('cCallHierarchy.includeGlobs') ||
-        e.affectsConfiguration('cCallHierarchy.excludeGlobs') ||
-        e.affectsConfiguration('cCallHierarchy.showSignatures')
+        e.affectsConfiguration('cCallHierarchyReferences.includeGlobs') ||
+        e.affectsConfiguration('cCallHierarchyReferences.excludeGlobs') ||
+        e.affectsConfiguration('cCallHierarchyReferences.showSignatures')
       ) {
         tree.refresh();
         refProvider.refresh();
         includeProvider.refresh();
       }
-      if (e.affectsConfiguration('cCallHierarchy.includePaths')) {
+      if (e.affectsConfiguration('cCallHierarchyReferences.includePaths')) {
         includeIndex.built = false; // force a rescan on next use
       }
     }),

@@ -2,7 +2,7 @@
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
   "description": "C/C++ call hierarchy (toggle callers / callees), read/write find-references, and a #include explorer — powered by your clangd.",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {
@@ -50,29 +50,29 @@
     "configuration": {
       "title": "C Call Hierarchy & References",
       "properties": {
-        "cCallHierarchy.maxDepth": {
+        "cCallHierarchyReferences.maxDepth": {
           "type": "number",
           "default": 32,
           "description": "Maximum expansion/walk depth for the call tree and include tree (guards against unbounded recursion)."
         },
-        "cCallHierarchy.excludeGlobs": {
+        "cCallHierarchyReferences.excludeGlobs": {
           "type": "array",
           "items": { "type": "string" },
           "default": [],
           "description": "Deny-list of path globs hidden from all views (call tree, references, includes, graph). Always wins over the include allow-list. Example: [\"**/test/**\", \"**/third_party/**\"]."
         },
-        "cCallHierarchy.includeGlobs": {
+        "cCallHierarchyReferences.includeGlobs": {
           "type": "array",
           "items": { "type": "string" },
           "default": [],
           "description": "Allow-list of path globs. When non-empty, only matching files are shown (AND-ed with the interactive path filter; excludeGlobs still wins). Empty = show everything."
         },
-        "cCallHierarchy.showSignatures": {
+        "cCallHierarchyReferences.showSignatures": {
           "type": "boolean",
           "default": true,
           "description": "Show each function's parameter types (its signature) in the call-tree node description and tooltip."
         },
-        "cCallHierarchy.includePaths": {
+        "cCallHierarchyReferences.includePaths": {
           "type": "array",
           "items": { "type": "string" },
           "default": [],
@@ -82,97 +82,97 @@
     },
     "commands": [
       {
-        "command": "cCallHierarchy.showHierarchy",
+        "command": "cCallHierarchyReferences.showHierarchy",
         "title": "Show call hierarchy for symbol under cursor",
         "category": "C Call Hierarchy & References",
         "icon": "$(type-hierarchy)"
       },
       {
-        "command": "cCallHierarchy.findReferences",
+        "command": "cCallHierarchyReferences.findReferences",
         "title": "Find references (read/write)",
         "category": "C Call Hierarchy & References",
         "icon": "$(references)"
       },
       {
-        "command": "cCallHierarchy.toggleDirection",
+        "command": "cCallHierarchyReferences.toggleDirection",
         "title": "Toggle incoming / outgoing calls",
         "category": "C Call Hierarchy & References",
         "icon": "$(arrow-swap)"
       },
       {
-        "command": "cCallHierarchy.openReferenceInEditor",
+        "command": "cCallHierarchyReferences.openReferenceInEditor",
         "title": "Open in editor",
         "category": "C Call Hierarchy & References",
         "icon": "$(go-to-file)"
       },
       {
-        "command": "cCallHierarchy.refresh",
+        "command": "cCallHierarchyReferences.refresh",
         "title": "Refresh call hierarchy",
         "category": "C Call Hierarchy & References",
         "icon": "$(refresh)"
       },
       {
-        "command": "cCallHierarchy.refreshReferences",
+        "command": "cCallHierarchyReferences.refreshReferences",
         "title": "Refresh references",
         "category": "C Call Hierarchy & References",
         "icon": "$(refresh)"
       },
       {
-        "command": "cCallHierarchy.clearReferences",
+        "command": "cCallHierarchyReferences.clearReferences",
         "title": "Clear references",
         "category": "C Call Hierarchy & References",
         "icon": "$(clear-all)"
       },
       {
-        "command": "cCallHierarchy.toggleReferenceGrouping",
+        "command": "cCallHierarchyReferences.toggleReferenceGrouping",
         "title": "Toggle reference grouping (file / folder)",
         "category": "C Call Hierarchy & References",
         "icon": "$(list-tree)"
       },
       {
-        "command": "cCallHierarchy.filterReferenceKinds",
+        "command": "cCallHierarchyReferences.filterReferenceKinds",
         "title": "Filter references by kind (read / write)",
         "category": "C Call Hierarchy & References",
         "icon": "$(filter)"
       },
       {
-        "command": "cCallHierarchy.setPathFilter",
+        "command": "cCallHierarchyReferences.setPathFilter",
         "title": "Set path filter…",
         "category": "C Call Hierarchy & References",
         "icon": "$(filter)"
       },
       {
-        "command": "cCallHierarchy.clearPathFilter",
+        "command": "cCallHierarchyReferences.clearPathFilter",
         "title": "Clear path filter",
         "category": "C Call Hierarchy & References",
         "icon": "$(filter-filled)"
       },
       {
-        "command": "cCallHierarchy.filterToFolder",
+        "command": "cCallHierarchyReferences.filterToFolder",
         "title": "Filter to this folder",
         "category": "C Call Hierarchy & References",
         "icon": "$(filter)"
       },
       {
-        "command": "cCallHierarchy.showIncludeHierarchy",
+        "command": "cCallHierarchyReferences.showIncludeHierarchy",
         "title": "Show include hierarchy",
         "category": "C Call Hierarchy & References",
         "icon": "$(list-tree)"
       },
       {
-        "command": "cCallHierarchy.toggleIncludeDirection",
+        "command": "cCallHierarchyReferences.toggleIncludeDirection",
         "title": "Toggle includes / included-by",
         "category": "C Call Hierarchy & References",
         "icon": "$(arrow-swap)"
       },
       {
-        "command": "cCallHierarchy.refreshIncludes",
+        "command": "cCallHierarchyReferences.refreshIncludes",
         "title": "Rescan #include graph",
         "category": "C Call Hierarchy & References",
         "icon": "$(refresh)"
       },
       {
-        "command": "cCallHierarchy.openIncludeGraph",
+        "command": "cCallHierarchyReferences.openIncludeGraph",
         "title": "Open include graph",
         "category": "C Call Hierarchy & References",
         "icon": "$(graph)"
@@ -181,88 +181,88 @@
     "menus": {
       "editor/context": [
         {
-          "command": "cCallHierarchy.showHierarchy",
+          "command": "cCallHierarchyReferences.showHierarchy",
           "when": "editorLangId == c || editorLangId == cpp",
           "group": "navigation@9"
         },
         {
-          "command": "cCallHierarchy.findReferences",
+          "command": "cCallHierarchyReferences.findReferences",
           "when": "editorLangId == c || editorLangId == cpp",
           "group": "navigation@9"
         },
         {
-          "command": "cCallHierarchy.showIncludeHierarchy",
+          "command": "cCallHierarchyReferences.showIncludeHierarchy",
           "when": "editorLangId == c || editorLangId == cpp",
           "group": "navigation@9"
         }
       ],
       "view/title": [
         {
-          "command": "cCallHierarchy.toggleDirection",
-          "when": "view == cCallHierarchy.tree",
+          "command": "cCallHierarchyReferences.toggleDirection",
+          "when": "view == cCallHierarchyReferences.tree",
           "group": "navigation@1"
         },
         {
-          "command": "cCallHierarchy.refresh",
-          "when": "view == cCallHierarchy.tree",
+          "command": "cCallHierarchyReferences.refresh",
+          "when": "view == cCallHierarchyReferences.tree",
           "group": "navigation@4"
         },
         {
-          "command": "cCallHierarchy.toggleReferenceGrouping",
-          "when": "view == cCallHierarchy.references",
+          "command": "cCallHierarchyReferences.toggleReferenceGrouping",
+          "when": "view == cCallHierarchyReferences.references",
           "group": "navigation@2"
         },
         {
-          "command": "cCallHierarchy.refreshReferences",
-          "when": "view == cCallHierarchy.references",
+          "command": "cCallHierarchyReferences.refreshReferences",
+          "when": "view == cCallHierarchyReferences.references",
           "group": "navigation@4"
         },
         {
-          "command": "cCallHierarchy.clearReferences",
-          "when": "view == cCallHierarchy.references",
+          "command": "cCallHierarchyReferences.clearReferences",
+          "when": "view == cCallHierarchyReferences.references",
           "group": "navigation@5"
         },
         {
-          "command": "cCallHierarchy.toggleIncludeDirection",
-          "when": "view == cCallHierarchy.includes",
+          "command": "cCallHierarchyReferences.toggleIncludeDirection",
+          "when": "view == cCallHierarchyReferences.includes",
           "group": "navigation@1"
         },
         {
-          "command": "cCallHierarchy.openIncludeGraph",
-          "when": "view == cCallHierarchy.includes",
+          "command": "cCallHierarchyReferences.openIncludeGraph",
+          "when": "view == cCallHierarchyReferences.includes",
           "group": "navigation@2"
         },
         {
-          "command": "cCallHierarchy.refreshIncludes",
-          "when": "view == cCallHierarchy.includes",
+          "command": "cCallHierarchyReferences.refreshIncludes",
+          "when": "view == cCallHierarchyReferences.includes",
           "group": "navigation@3"
         }
       ],
       "view/item/context": [
         {
-          "command": "cCallHierarchy.openReferenceInEditor",
-          "when": "view == cCallHierarchy.tree && viewItem =~ /^(root|call|recursive)$/",
+          "command": "cCallHierarchyReferences.openReferenceInEditor",
+          "when": "view == cCallHierarchyReferences.tree && viewItem =~ /^(root|call|recursive)$/",
           "group": "inline"
         },
         {
-          "command": "cCallHierarchy.showIncludeHierarchy",
-          "when": "view == cCallHierarchy.includes && viewItem == includeFile",
+          "command": "cCallHierarchyReferences.showIncludeHierarchy",
+          "when": "view == cCallHierarchyReferences.includes && viewItem == includeFile",
           "group": "navigation@1"
         },
         {
-          "command": "cCallHierarchy.filterToFolder",
-          "when": "view == cCallHierarchy.includes && viewItem == includeFile",
+          "command": "cCallHierarchyReferences.filterToFolder",
+          "when": "view == cCallHierarchyReferences.includes && viewItem == includeFile",
           "group": "navigation@2"
         }
       ],
       "explorer/context": [
         {
-          "command": "cCallHierarchy.filterToFolder",
+          "command": "cCallHierarchyReferences.filterToFolder",
           "when": "explorerResourceIsFolder",
           "group": "navigation@9"
         },
         {
-          "command": "cCallHierarchy.showIncludeHierarchy",
+          "command": "cCallHierarchyReferences.showIncludeHierarchy",
           "when": "resourceLangId == c || resourceLangId == cpp",
           "group": "navigation@9"
         }
@@ -271,31 +271,31 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "cCallHierarchyContainer",
+          "id": "cCallHierarchyReferencesContainer",
           "title": "C Call Hierarchy & References",
           "icon": "icons/activity.svg"
         }
       ]
     },
     "views": {
-      "cCallHierarchyContainer": [
+      "cCallHierarchyReferencesContainer": [
         {
-          "id": "cCallHierarchy.filterPanel",
+          "id": "cCallHierarchyReferences.filterPanel",
           "name": "Filter",
           "type": "webview"
         },
         {
-          "id": "cCallHierarchy.tree",
+          "id": "cCallHierarchyReferences.tree",
           "name": "Call Hierarchy",
           "type": "tree"
         },
         {
-          "id": "cCallHierarchy.references",
+          "id": "cCallHierarchyReferences.references",
           "name": "References",
           "type": "tree"
         },
         {
-          "id": "cCallHierarchy.includes",
+          "id": "cCallHierarchyReferences.includes",
           "name": "Header Includes",
           "type": "tree"
         }
@@ -303,12 +303,12 @@
     },
     "viewsWelcome": [
       {
-        "view": "cCallHierarchy.references",
-        "contents": "Find all references to a C/C++ symbol, badged read / write / declaration.\n[Find References](command:cCallHierarchy.findReferences)"
+        "view": "cCallHierarchyReferences.references",
+        "contents": "Find all references to a C/C++ symbol, badged read / write / declaration.\n[Find References](command:cCallHierarchyReferences.findReferences)"
       },
       {
-        "view": "cCallHierarchy.includes",
-        "contents": "Show which headers a C/C++ file includes (and which files include it).\n[Show Include Hierarchy](command:cCallHierarchy.showIncludeHierarchy)"
+        "view": "cCallHierarchyReferences.includes",
+        "contents": "Show which headers a C/C++ file includes (and which files include it).\n[Show Include Hierarchy](command:cCallHierarchyReferences.showIncludeHierarchy)"
       }
     ]
   },

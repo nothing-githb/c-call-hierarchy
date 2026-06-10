@@ -127,7 +127,7 @@ suite(`real CallTreeProvider — click targets [${PROVIDER}]`, () => {
     await vscode.window.showTextDocument(doc, { preview: false });
     editor.selection = new vscode.Selection(pos, pos);
     try {
-      await vscode.commands.executeCommand('cCallHierarchy.showHierarchy');
+      await vscode.commands.executeCommand('cCallHierarchyReferences.showHierarchy');
     } catch {
       /* reveal may reject in headless; roots are already set */
     }
@@ -191,7 +191,7 @@ suite(`real CallTreeProvider — click targets [${PROVIDER}]`, () => {
 
     const node = callees[0];
     const [expUri, expRange] = (await t.getTreeItem(node)).command.arguments;
-    await vscode.commands.executeCommand('cCallHierarchy.openReferenceInEditor', node);
+    await vscode.commands.executeCommand('cCallHierarchyReferences.openReferenceInEditor', node);
 
     const ed = vscode.window.activeTextEditor;
     assert.ok(ed, 'an editor is active after Open in editor');

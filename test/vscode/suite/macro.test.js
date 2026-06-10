@@ -37,7 +37,7 @@ suite(`macro-hidden calls [${PROVIDER}]`, () => {
     await vscode.window.showTextDocument(doc, { preview: false });
     editor.selection = new vscode.Selection(pos, pos);
     try {
-      await vscode.commands.executeCommand('cCallHierarchy.showHierarchy');
+      await vscode.commands.executeCommand('cCallHierarchyReferences.showHierarchy');
     } catch {
       /* reveal may reject headless */
     }

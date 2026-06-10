@@ -4,7 +4,7 @@
  *   - a header DECLARATION (prototype in a .h),
  *   - a USAGE / call site (in some other .c),
  *   - the DEFINITION itself.
- * Drives the REAL extension flow (cCallHierarchy.showHierarchy → h.prepare) and
+ * Drives the REAL extension flow (cCallHierarchyReferences.showHierarchy → h.prepare) and
  * inspects the actual command.arguments of each tree node. */
 const assert = require('assert');
 const vscode = require('vscode');
@@ -45,7 +45,7 @@ async function showHierarchyAt(fileUri, findPos) {
   await vscode.window.showTextDocument(doc, { preview: false });
   editor.selection = new vscode.Selection(pos, pos);
   try {
-    await vscode.commands.executeCommand('cCallHierarchy.showHierarchy');
+    await vscode.commands.executeCommand('cCallHierarchyReferences.showHierarchy');
   } catch {
     /* reveal may reject headless; roots are set regardless */
   }

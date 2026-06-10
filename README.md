@@ -81,7 +81,7 @@ A fixed **Filter** pane at the top searches by **function name or path** across 
 - The **clangd** extension (`llvm-vs-code-extensions.vscode-clangd`), installed and active — for the call
   hierarchy, references and signatures.
 - A clangd index for your project: a `compile_commands.json` or `compile_flags.txt`.
-- The **Header Includes** view needs no clangd — only the files on disk (set `cCallHierarchy.includePaths`
+- The **Header Includes** view needs no clangd — only the files on disk (set `cCallHierarchyReferences.includePaths`
   to resolve `<...>` includes).
 
 > If both **clangd** and **ms-vscode.cpptools** are installed, make sure clangd is the active C/C++
@@ -98,11 +98,11 @@ A fixed **Filter** pane at the top searches by **function name or path** across 
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `cCallHierarchy.maxDepth` | `32` | Max expansion/walk depth for the call and include trees. |
-| `cCallHierarchy.excludeGlobs` | `[]` | Deny-list of path globs hidden from all views. |
-| `cCallHierarchy.includeGlobs` | `[]` | Allow-list of path globs; empty = show everything. |
-| `cCallHierarchy.showSignatures` | `true` | Show caller parameter types in the call tree. |
-| `cCallHierarchy.includePaths` | `[]` | Extra include search dirs for resolving `#include <...>`. |
+| `cCallHierarchyReferences.maxDepth` | `32` | Max expansion/walk depth for the call and include trees. |
+| `cCallHierarchyReferences.excludeGlobs` | `[]` | Deny-list of path globs hidden from all views. |
+| `cCallHierarchyReferences.includeGlobs` | `[]` | Allow-list of path globs; empty = show everything. |
+| `cCallHierarchyReferences.showSignatures` | `true` | Show caller parameter types in the call tree. |
+| `cCallHierarchyReferences.includePaths` | `[]` | Extra include search dirs for resolving `#include <...>`. |
 
 ## 🧠 How it works
 
