@@ -2,7 +2,7 @@
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
   "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — powered by your clangd.",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {

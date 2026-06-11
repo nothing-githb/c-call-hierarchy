@@ -7,6 +7,7 @@ function run() {
   mocha.addFile(path.join(__dirname, 'treeprovider.test.js'));
   mocha.addFile(path.join(__dirname, 'scenarios.test.js'));
   mocha.addFile(path.join(__dirname, 'macro.test.js'));
+  mocha.addFile(path.join(__dirname, 'v15.test.js'));
   return new Promise((resolve, reject) => {
     try {
       mocha.run((failures) => (failures > 0 ? reject(new Error(`${failures} test(s) failed`)) : resolve()));

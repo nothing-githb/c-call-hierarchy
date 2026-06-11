@@ -2,27 +2,27 @@
 
 <p align="center">
   See <b>who calls what</b> and <b>who reads vs writes</b> a symbol in C/C++ —
-  powered by your <a href="https://clangd.llvm.org/">clangd</a>.
+  powered by your C/C++ language server — <a href="https://clangd.llvm.org/">clangd</a> (recommended) or Microsoft C/C++.
 </p>
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=halistahasahin.c-call-hierarchy-references"><img alt="Marketplace version" src="https://img.shields.io/visual-studio-marketplace/v/halistahasahin.c-call-hierarchy-references?color=2d6cdf&label=Marketplace"></a>
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-%5E1.75-2d6cdf">
-  <img alt="requires clangd" src="https://img.shields.io/badge/requires-clangd-8a56e2">
+  <img alt="works with clangd or cpptools" src="https://img.shields.io/badge/works%20with-clangd%20%7C%20cpptools-8a56e2">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-3FB950">
 </p>
 
 <p align="center">
   <img alt="C Call Hierarchy & References — toggle callers/callees, parameter signatures, and a previewed call site"
-       src="assets/hero.png" width="900">
+       src="https://raw.githubusercontent.com/nothing-githb/c-call-hierarchy-references/main/assets/hero.png" width="900">
 </p>
 
 clangd already knows your code. **C Call Hierarchy & References** re-presents what it knows the way you actually want
 it: callers **and** callees at once, references split into **reads vs writes**, and third-party noise
 filtered out — without leaving the sidebar.
 
-> It does **not** run its own language server. It consumes clangd's results through VS Code's provider
-> commands, so accuracy equals clangd's accuracy — with zero extra setup.
+> It does **not** run its own language server. It consumes your C/C++ provider's results through VS Code's
+> provider commands, so accuracy equals your provider's — with zero extra setup.
 
 ---
 
@@ -38,7 +38,7 @@ editor** action jumps there for real and moves focus to the editor.
 
 ### Find references — read vs write
 <img alt="References grouped by folder with read/write/declaration letter icons"
-     src="assets/references.png" width="430" align="right">
+     src="https://raw.githubusercontent.com/nothing-githb/c-call-hierarchy-references/main/assets/references.png" width="430" align="right">
 
 **Find references** opens a dedicated tree where every occurrence is badged:
 
@@ -67,16 +67,16 @@ A fixed **Filter** pane at the top searches by **function name or path** across 
 
 ## ✅ Requirements
 
-- The **clangd** extension (`llvm-vs-code-extensions.vscode-clangd`), installed and active — for the call
-  hierarchy, references and signatures.
-- A clangd index for your project: a `compile_commands.json` or `compile_flags.txt`.
+- A C/C++ language provider with call-hierarchy support, installed and active — **clangd**
+  (`llvm-vs-code-extensions.vscode-clangd`, recommended) or **Microsoft C/C++** (`ms-vscode.cpptools`).
+- A project index your provider can use: a `compile_commands.json` or `compile_flags.txt`.
 
 > If both **clangd** and **ms-vscode.cpptools** are installed, make sure clangd is the active C/C++
 > provider for best read/write accuracy.
 
 ## 🚀 Getting started
 
-1. Install this extension and **clangd**, and open a C/C++ project that clangd can index.
+1. Install this extension and a C/C++ provider (**clangd** recommended), and open a C/C++ project it can index.
 2. Click the **C Call Hierarchy & References** icon in the Activity Bar.
 3. Right-click a function → **Show call hierarchy** / **Find references**.
 
@@ -93,13 +93,13 @@ A fixed **Filter** pane at the top searches by **function name or path** across 
 
 For call hierarchy, references and signatures the extension calls VS Code's built-in provider commands
 (`prepareCallHierarchy`, `provideIncoming/OutgoingCalls`, `executeReferenceProvider`,
-`executeDocumentHighlights`, `executeHoverProvider`) which delegate to **your clangd**. No second language
+`executeDocumentHighlights`, `executeHoverProvider`) which delegate to **your C/C++ provider**. No second language
 server is spawned.
 
 ## ❓ FAQ
 
-**Nothing shows up.** Make sure the clangd extension is installed, active, and has finished indexing
-(watch its status item), and that clangd — not cpptools — is answering.
+**Nothing shows up.** Make sure your C/C++ provider (clangd or Microsoft C/C++) is installed, active, and
+has finished indexing — clangd gives the most accurate read/write classification.
 
 **Read/write looks wrong.** Read/write is recovered from clangd's highlight roles; if another provider
 answers without roles, a syntactic fallback kicks in. Globals/struct fields are the clearest demo.

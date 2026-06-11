@@ -3,6 +3,19 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.16]
+
+### Docs
+- README screenshots now use **absolute image URLs** so they render on the **Marketplace** page (relative
+  paths only resolve on GitHub / in VS Code).
+- Clarified that the extension works with **any C/C++ provider — clangd (recommended) or Microsoft C/C++**
+  (`ms-vscode.cpptools`) — not clangd only. (Both are exercised by the integration tests.)
+
+### Tests
+- Added integration coverage for the v0.1.15 changes: coloured symbol icons, the ×N **call-site picker**
+  (clangd merges call sites into one node; cpptools returns one node each — both verified), and the
+  folder-mode **expand-on-open**.
+
 ## [0.1.15]
 
 ### Added
@@ -161,6 +174,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.16]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.16
 [0.1.15]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.15
 [0.1.14]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.14
 [0.1.13]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.13

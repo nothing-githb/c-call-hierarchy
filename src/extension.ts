@@ -9,7 +9,9 @@ import {
   getRuntimeFilter,
 } from './filter';
 
-export function activate(context: vscode.ExtensionContext): { tree: CallTreeProvider } {
+export function activate(
+  context: vscode.ExtensionContext,
+): { tree: CallTreeProvider; references: ReferencesProvider } {
   initFilterState(context);
 
   // --- Call hierarchy view ---
@@ -291,8 +293,8 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
   // Restore the persisted path-filter indicator on startup.
   void applyPathFilter();
 
-  // Exposed for integration tests to drive the real tree provider.
-  return { tree };
+  // Exposed for integration tests to drive the real providers.
+  return { tree, references: refProvider };
 }
 
 function symbolNameAt(editor: vscode.TextEditor): string {
