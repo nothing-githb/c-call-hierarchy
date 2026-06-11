@@ -2,7 +2,7 @@
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
   "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — powered by your clangd.",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {
@@ -98,6 +98,12 @@
         "icon": "$(go-to-file)"
       },
       {
+        "command": "cCallHierarchyReferences.goToCallSite",
+        "title": "Go to call site…",
+        "category": "C Call Hierarchy & References",
+        "icon": "$(references)"
+      },
+      {
         "command": "cCallHierarchyReferences.refresh",
         "title": "Refresh call hierarchy",
         "category": "C Call Hierarchy & References",
@@ -189,8 +195,13 @@
       "view/item/context": [
         {
           "command": "cCallHierarchyReferences.openReferenceInEditor",
-          "when": "view == cCallHierarchyReferences.tree && viewItem =~ /^(root|call|recursive)$/",
-          "group": "inline"
+          "when": "view == cCallHierarchyReferences.tree && viewItem =~ /^(root|call|recursive)(Multi)?$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "cCallHierarchyReferences.goToCallSite",
+          "when": "view == cCallHierarchyReferences.tree && viewItem =~ /Multi$/",
+          "group": "inline@2"
         }
       ],
       "explorer/context": [

@@ -3,6 +3,19 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.15]
+
+### Added
+- **Browse a node's multiple call sites.** When the call tree merges several call sites into one node
+  (the **×N** badge), a new inline **Go to call site…** action opens a quick pick — arrow to preview each
+  site, Enter to open it.
+
+### Fixed
+- **Find references** now shows results directly in **folder** grouping: the top folder levels render
+  expanded (it previously opened to a row of collapsed folders, looking empty).
+- Call-tree **symbol icons** are now coloured with the theme's standard `symbolIcon.*` colours (the `ƒ`
+  and friends match VS Code's built-in call hierarchy / outline) instead of monochrome.
+
 ## [0.1.14]
 
 ### Removed
@@ -148,6 +161,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.15]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.15
 [0.1.14]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.14
 [0.1.13]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.13
 [0.1.12]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.12

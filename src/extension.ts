@@ -158,6 +158,44 @@ export function activate(context: vscode.ExtensionContext): { tree: CallTreeProv
       const t = nodeTarget(node);
       return revealAt(t.uri, t.range, { preserveFocus: false, preview: false });
     }),
+    // Browse between a node's several merged call sites (the ×N badge): arrow to
+    // preview each, Enter to open the chosen one.
+    vscode.commands.registerCommand('cCallHierarchyReferences.goToCallSite', async (node: CallNode) => {
+      const uri = node.callUri;
+      const sites = node.fromRanges;
+      if (!uri || sites.length <= 1) {
+        const t = nodeTarget(node);
+        return revealAt(t.uri, t.range, { preserveFocus: false, preview: false });
+      }
+      let doc: vscode.TextDocument | undefined;
+      try {
+        doc = await vscode.workspace.openTextDocument(uri);
+      } catch {
+        /* labels fall back to the line number */
+      }
+      const qp = vscode.window.createQuickPick<vscode.QuickPickItem & { range: vscode.Range }>();
+      qp.title = `${node.item.name} — ${sites.length} call sites`;
+      qp.placeholder = 'Arrow to preview · Enter to open';
+      qp.items = sites.map((r, i) => ({
+        label: doc?.lineAt(r.start.line).text.trim() || `call site ${i + 1}`,
+        description: `:${r.start.line + 1}:${r.start.character + 1}`,
+        range: r,
+      }));
+      qp.onDidChangeActive((active) => {
+        if (active[0]) {
+          void revealAt(uri, active[0].range, { preserveFocus: true, preview: true });
+        }
+      });
+      qp.onDidAccept(() => {
+        const picked = qp.activeItems[0];
+        qp.hide();
+        if (picked) {
+          void revealAt(uri, picked.range, { preserveFocus: false, preview: false });
+        }
+      });
+      qp.onDidHide(() => qp.dispose());
+      qp.show();
+    }),
     vscode.commands.registerCommand('cCallHierarchyReferences.toggleReferenceGrouping', () => {
       refProvider.toggleGrouping();
       vscode.window.setStatusBarMessage(

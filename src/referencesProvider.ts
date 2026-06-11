@@ -3,7 +3,7 @@ import { ClassifiedRef, RefKind } from './hierarchy';
 import { passesFilter } from './filter';
 
 type RefTreeNode =
-  | { kind: 'folder'; label: string; path: string; children: RefTreeNode[] }
+  | { kind: 'folder'; label: string; path: string; depth: number; children: RefTreeNode[] }
   | { kind: 'file'; uri: vscode.Uri; refs: ClassifiedRef[]; showDir: boolean }
   | { kind: 'leaf'; ref: ClassifiedRef };
 
@@ -26,6 +26,11 @@ const ALL_KINDS: RefKind[] = [
   RefKind.Declaration,
   RefKind.Unknown,
 ];
+
+/** How many top folder levels render Expanded on open, so "Find references" shows
+ *  results directly in folder mode; deeper folders stay Collapsed to bound render
+ *  cost on very large result sets. */
+const AUTO_EXPAND_DEPTH = 3;
 
 /** Renders classified references, grouped by file or by folder, with a kind filter. */
 export class ReferencesProvider implements vscode.TreeDataProvider<RefTreeNode> {
@@ -247,7 +252,7 @@ export class ReferencesProvider implements vscode.TreeDataProvider<RefTreeNode> 
       bucket.push(r);
     }
 
-    const toNodes = (dir: Dir, parentPath: string): RefTreeNode[] => {
+    const toNodes = (dir: Dir, parentPath: string, depth: number): RefTreeNode[] => {
       const folders: RefTreeNode[] = [...dir.dirs.values()]
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((sub) => {
@@ -261,7 +266,13 @@ export class ReferencesProvider implements vscode.TreeDataProvider<RefTreeNode> 
             full += `/${only.name}`;
             d = only;
           }
-          return { kind: 'folder' as const, label, path: full, children: toNodes(d, full) };
+          return {
+            kind: 'folder' as const,
+            label,
+            path: full,
+            depth,
+            children: toNodes(d, full, depth + 1),
+          };
         });
       const files: RefTreeNode[] = [...dir.files.entries()]
         .map(([key, refs]) => ({
@@ -274,14 +285,25 @@ export class ReferencesProvider implements vscode.TreeDataProvider<RefTreeNode> 
       return [...folders, ...files];
     };
 
-    return toNodes(root, '');
+    return toNodes(root, '', 0);
   }
 
   // ---- tree items ----------------------------------------------------------
 
-  private folderItem(node: { label: string; path: string; children: RefTreeNode[] }): vscode.TreeItem {
+  private folderItem(node: {
+    label: string;
+    path: string;
+    depth: number;
+    children: RefTreeNode[];
+  }): vscode.TreeItem {
     const count = countRefs(node.children);
-    const ti = new vscode.TreeItem(node.label, vscode.TreeItemCollapsibleState.Collapsed);
+    // Top levels render open so "Find references" shows results directly (folder
+    // mode previously opened to a row of collapsed folders).
+    const state =
+      node.depth < AUTO_EXPAND_DEPTH
+        ? vscode.TreeItemCollapsibleState.Expanded
+        : vscode.TreeItemCollapsibleState.Collapsed;
+    const ti = new vscode.TreeItem(node.label, state);
     ti.iconPath = vscode.ThemeIcon.Folder;
     ti.description = `${count} ref${count === 1 ? '' : 's'}`;
     ti.contextValue = 'refFolder';

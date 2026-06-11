@@ -149,7 +149,10 @@ export class CallTreeProvider implements vscode.TreeDataProvider<CallNode> {
       title: 'Open',
       arguments: [t.uri, t.range],
     };
-    ti.contextValue = recursive ? 'recursive' : node.kind;
+    // `...Multi` marks a node with several merged call sites — enables the
+    // inline "Go to call site…" picker to browse between them.
+    const multi = node.fromRanges.length > 1 ? 'Multi' : '';
+    ti.contextValue = (recursive ? 'recursive' : node.kind) + multi;
     return ti;
   }
 
@@ -183,27 +186,40 @@ export function nodeTarget(node: CallNode): { uri: vscode.Uri; range: vscode.Ran
     : { uri: node.item.uri, range: node.item.selectionRange };
 }
 
+// Colour the symbol icon with the theme's standard symbol colours (the same
+// `symbolIcon.*Foreground` keys VS Code's built-in call hierarchy / outline use),
+// so the function `ƒ` etc. show coloured instead of monochrome.
 function iconFor(kind: vscode.SymbolKind): vscode.ThemeIcon {
   let id: string;
+  let color: string;
   switch (kind) {
     case vscode.SymbolKind.Function:
       id = 'symbol-function';
+      color = 'symbolIcon.functionForeground';
       break;
     case vscode.SymbolKind.Method:
       id = 'symbol-method';
+      color = 'symbolIcon.methodForeground';
       break;
     case vscode.SymbolKind.Constructor:
       id = 'symbol-constructor';
+      color = 'symbolIcon.constructorForeground';
       break;
     case vscode.SymbolKind.Field:
-    case vscode.SymbolKind.Property:
       id = 'symbol-field';
+      color = 'symbolIcon.fieldForeground';
+      break;
+    case vscode.SymbolKind.Property:
+      id = 'symbol-property';
+      color = 'symbolIcon.propertyForeground';
       break;
     case vscode.SymbolKind.Variable:
       id = 'symbol-variable';
+      color = 'symbolIcon.variableForeground';
       break;
     default:
       id = 'symbol-misc';
+      color = 'symbolIcon.functionForeground';
   }
-  return new vscode.ThemeIcon(id);
+  return new vscode.ThemeIcon(id, new vscode.ThemeColor(color));
 }
