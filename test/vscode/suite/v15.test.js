@@ -82,6 +82,33 @@ suite(`v0.1.15 features [${PROVIDER}]`, () => {
     );
   });
 
+  test('Enter cycles through a ×N node\'s call sites (nextCallSite)', async function () {
+    this.timeout(180000);
+    const cmds = await vscode.commands.getCommands(true);
+    assert.ok(cmds.includes('cCallHierarchyReferences.nextCallSite'), 'nextCallSite command registered');
+
+    const rootNode = await dispatchRoots(tree);
+    if (tree.getDirection() !== 'outgoing') tree.toggleDirection();
+    const callees = await tree.getChildren(rootNode);
+    const multi = callees.find((n) => n.fromRanges.length > 1);
+
+    if (multi) {
+      // ×N node (clangd): a fresh node's click target is site 0, so the first
+      // Enter lands on site 1, the next on site 2, …
+      const a = await vscode.commands.executeCommand('cCallHierarchyReferences.nextCallSite', multi);
+      assert.deepStrictEqual(a, { index: 1, total: multi.fromRanges.length }, 'first Enter → site 2');
+      const b = await vscode.commands.executeCommand('cCallHierarchyReferences.nextCallSite', multi);
+      assert.strictEqual(b.index, 2, 'second Enter → site 3');
+      console.log(`  ${multi.item.name} ×${a.total}: Enter → ${a.index + 1}, ${b.index + 1} (cycle) ✔`);
+    } else {
+      // one node per call site (cpptools): cycling a single site stays put.
+      const one = callees.find((n) => n.fromRanges.length === 1);
+      const r = await vscode.commands.executeCommand('cCallHierarchyReferences.nextCallSite', one);
+      assert.deepStrictEqual(r, { index: 0, total: 1 }, 'single-site node stays at its only site');
+      console.log('  single-site nodes: nextCallSite stays at 1/1 ✔');
+    }
+  });
+
   test('References in folder mode render the top folders Expanded', async function () {
     this.timeout(180000);
     const refs = api.references;

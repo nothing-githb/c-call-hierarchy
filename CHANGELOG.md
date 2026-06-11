@@ -3,6 +3,13 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.17]
+
+### Added
+- **Keyboard: walk a ×N node's call sites with Enter.** With a call-tree node that merges several call
+  sites (the **×N** badge) selected, pressing **Enter** steps to the next call site — previewing each and
+  wrapping around — while focus stays in the tree. Other nodes keep the normal Enter behaviour.
+
 ## [0.1.16]
 
 ### Docs
@@ -174,6 +181,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.17]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.17
 [0.1.16]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.16
 [0.1.15]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.15
 [0.1.14]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.14

@@ -1,8 +1,8 @@
 {
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
-  "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — powered by your clangd.",
-  "version": "0.1.16",
+  "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — works with clangd (recommended) or Microsoft C/C++.",
+  "version": "0.1.17",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {
@@ -104,6 +104,11 @@
         "icon": "$(references)"
       },
       {
+        "command": "cCallHierarchyReferences.nextCallSite",
+        "title": "Next call site (cycle)",
+        "category": "C Call Hierarchy & References"
+      },
+      {
         "command": "cCallHierarchyReferences.refresh",
         "title": "Refresh call hierarchy",
         "category": "C Call Hierarchy & References",
@@ -150,6 +155,13 @@
         "title": "Filter to this folder",
         "category": "C Call Hierarchy & References",
         "icon": "$(filter)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "cCallHierarchyReferences.nextCallSite",
+        "key": "enter",
+        "when": "focusedView == cCallHierarchyReferences.tree && cCallHierarchyReferences.selectedMulti"
       }
     ],
     "menus": {

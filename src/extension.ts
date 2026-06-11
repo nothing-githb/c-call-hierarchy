@@ -70,6 +70,43 @@ export function activate(
     }, 1500);
   };
 
+  // Browse a node's several merged call sites with the keyboard (F4 / Shift+F4):
+  // cycle through its fromRanges, previewing each; focus stays in the tree.
+  let callSiteCursor: { key: string; index: number } | undefined;
+  const cycleCallSite = (
+    delta: number,
+    node?: CallNode,
+  ): { index: number; total: number } | undefined => {
+    node = node ?? callView.selection[0];
+    if (!node || !node.callUri || node.fromRanges.length === 0) {
+      return undefined;
+    }
+    const sites = node.fromRanges;
+    const key = `${node.key}|${node.callUri.toString()}`;
+    // A fresh node's click target is site 0, so the first "next" lands on site 1.
+    const prev = callSiteCursor && callSiteCursor.key === key ? callSiteCursor.index : 0;
+    const index = (prev + delta + sites.length) % sites.length;
+    callSiteCursor = { key, index };
+    void revealAt(node.callUri, sites[index], { preserveFocus: true, preview: true });
+    if (sites.length > 1) {
+      vscode.window.setStatusBarMessage(`Call site ${index + 1} / ${sites.length}`, 2500);
+    }
+    return { index, total: sites.length };
+  };
+
+  // Enter on a ×N node walks its call sites (see the keybinding). Reset the cursor
+  // when the selection changes, and expose a context key gating that keybinding.
+  context.subscriptions.push(
+    callView.onDidChangeSelection((e) => {
+      callSiteCursor = undefined;
+      void vscode.commands.executeCommand(
+        'setContext',
+        'cCallHierarchyReferences.selectedMulti',
+        (e.selection[0]?.fromRanges.length ?? 0) > 1,
+      );
+    }),
+  );
+
   let filterPanel: FilterPanelProvider | undefined;
 
   const applyPathFilter = async (): Promise<void> => {
@@ -198,6 +235,11 @@ export function activate(
       qp.onDidHide(() => qp.dispose());
       qp.show();
     }),
+    // Enter on a ×N node walks its merged call sites (one per press, wrapping);
+    // bound to Enter via a keybinding gated on `selectedMulti`.
+    vscode.commands.registerCommand('cCallHierarchyReferences.nextCallSite', (node?: CallNode) =>
+      cycleCallSite(1, node),
+    ),
     vscode.commands.registerCommand('cCallHierarchyReferences.toggleReferenceGrouping', () => {
       refProvider.toggleGrouping();
       vscode.window.setStatusBarMessage(
