@@ -2,7 +2,7 @@
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
   "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — works with clangd (recommended) or Microsoft C/C++.",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {
@@ -117,6 +117,16 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "cCallHierarchyReferences.openReferenceInEditor",
+          "when": "false"
+        },
+        {
+          "command": "cCallHierarchyReferences.filterToFolder",
+          "when": "false"
+        }
+      ],
       "editor/context": [
         {
           "command": "cCallHierarchyReferences.showHierarchy",

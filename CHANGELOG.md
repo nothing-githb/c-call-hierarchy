@@ -3,6 +3,15 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.29]
+
+### Changed
+- Hid **Open in editor** and **Filter to this folder** from the Command Palette. They only make sense on a
+  call-tree node and an Explorer folder respectively, so running them from the palette did nothing useful
+  (one even errored). They stay available as the node's inline action and the Explorer right-click.
+- **Smaller package:** the README screenshots are served from GitHub (absolute URLs), so the `assets/` PNGs
+  are no longer bundled in the `.vsix` — about 250 KB lighter.
+
 ## [0.1.28]
 
 ### Removed
@@ -296,6 +305,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.29]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.29
 [0.1.28]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.28
 [0.1.27]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.27
 [0.1.26]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.26
