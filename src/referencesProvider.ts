@@ -79,31 +79,6 @@ export class ReferencesProvider implements vscode.TreeDataProvider<RefTreeNode> 
     return this.groupMode;
   }
 
-  /** Interactive multi-select of which reference kinds to show. */
-  async promptKindFilter(): Promise<void> {
-    const items: (vscode.QuickPickItem & { kinds: RefKind[] })[] = [
-      { label: 'Write', kinds: [RefKind.Write], picked: this.kindFilter.has(RefKind.Write) },
-      { label: 'Read', kinds: [RefKind.Read], picked: this.kindFilter.has(RefKind.Read) },
-      { label: 'Address-of (&)', kinds: [RefKind.Address], picked: this.kindFilter.has(RefKind.Address) },
-      {
-        label: 'Declaration / definition',
-        kinds: [RefKind.Declaration, RefKind.Definition],
-        picked: this.kindFilter.has(RefKind.Declaration),
-      },
-      { label: 'Unknown', kinds: [RefKind.Unknown], picked: this.kindFilter.has(RefKind.Unknown) },
-    ];
-    const picked = await vscode.window.showQuickPick(items, {
-      canPickMany: true,
-      title: 'Show reference kinds',
-      placeHolder: 'Pick which read/write kinds to show',
-    });
-    if (!picked) {
-      return; // cancelled — leave filter unchanged
-    }
-    this.kindFilter = new Set(picked.flatMap((p) => p.kinds));
-    this.refresh();
-  }
-
   /** Toggle a kind category (w/r/d/u) on or off; used by the filter-pane chips. */
   toggleKindCategory(cat: KindCat): void {
     const kinds = CAT_KINDS[cat];

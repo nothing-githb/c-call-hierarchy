@@ -3,6 +3,16 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.28]
+
+### Removed
+- **Trimmed redundant commands.** Removed **Set path filter…**, **Clear path filter**, and **Filter
+  references by kind** — the always-visible **Filter** pane already does all of this (its input, **Clear**
+  button, and **w / r / & / d / ·** chips), so the separate Command Palette entries were dead duplicates.
+  Also removed **Next call site** from the Command Palette: it is the call-tree node's own Enter/click
+  command (`TreeItem.command`), not meant to be run from the palette. No behaviour changes — the call tree,
+  references and filtering all work exactly as before.
+
 ## [0.1.27]
 
 ### Changed
@@ -286,6 +296,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.28]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.28
 [0.1.27]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.27
 [0.1.26]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.26
 [0.1.25]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.25

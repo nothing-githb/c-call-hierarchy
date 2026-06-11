@@ -2,7 +2,7 @@
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
   "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — works with clangd (recommended) or Microsoft C/C++.",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {
@@ -86,11 +86,6 @@
         "icon": "$(go-to-file)"
       },
       {
-        "command": "cCallHierarchyReferences.nextCallSite",
-        "title": "Next call site (Enter walks a ×N node's call sites)",
-        "category": "C Call Hierarchy & References"
-      },
-      {
         "command": "cCallHierarchyReferences.refresh",
         "title": "Refresh call hierarchy",
         "category": "C Call Hierarchy & References",
@@ -113,24 +108,6 @@
         "title": "Toggle reference grouping (file / folder)",
         "category": "C Call Hierarchy & References",
         "icon": "$(list-tree)"
-      },
-      {
-        "command": "cCallHierarchyReferences.filterReferenceKinds",
-        "title": "Filter references by kind (read / write)",
-        "category": "C Call Hierarchy & References",
-        "icon": "$(filter)"
-      },
-      {
-        "command": "cCallHierarchyReferences.setPathFilter",
-        "title": "Set path filter…",
-        "category": "C Call Hierarchy & References",
-        "icon": "$(filter)"
-      },
-      {
-        "command": "cCallHierarchyReferences.clearPathFilter",
-        "title": "Clear path filter",
-        "category": "C Call Hierarchy & References",
-        "icon": "$(filter-filled)"
       },
       {
         "command": "cCallHierarchyReferences.filterToFolder",

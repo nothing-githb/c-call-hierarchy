@@ -234,59 +234,11 @@ export function activate(
         2000,
       );
     }),
-    vscode.commands.registerCommand('cCallHierarchyReferences.filterReferenceKinds', async () => {
-      await refProvider.promptKindFilter();
-      filterPanel?.updateKinds();
-    }),
+    // The path filter and reference-kind toggles are driven entirely by the fixed
+    // Filter pane (its input, Clear button and w/r/&/d/· chips), so there are no
+    // separate setPathFilter / clearPathFilter / filterReferenceKinds commands.
 
-    // ---- Path filter (live: applies as you type, reverts on Escape) ----
-    vscode.commands.registerCommand('cCallHierarchyReferences.setPathFilter', () => {
-      const original = getRuntimeFilter();
-      const input = vscode.window.createInputBox();
-      input.title = 'Filter by name or path (contains, glob, or /regex/)';
-      input.placeholder = 'bus   ·   src/net/**   ·   /drv_\\d+/   (live)';
-      input.value = original ?? '';
-      let accepted = false;
-      let timer: ReturnType<typeof setTimeout> | undefined;
-      const live = (value: string) => {
-        if (timer) {
-          clearTimeout(timer);
-        }
-        // Debounce so each keystroke doesn't re-query clangd for the call tree.
-        timer = setTimeout(() => {
-          setRuntimeFilter(value);
-          void applyPathFilter();
-        }, 250);
-      };
-      input.onDidChangeValue(live);
-      input.onDidAccept(() => {
-        accepted = true;
-        if (timer) {
-          clearTimeout(timer);
-        }
-        setRuntimeFilter(input.value);
-        void applyPathFilter();
-        input.hide();
-      });
-      input.onDidHide(() => {
-        if (timer) {
-          clearTimeout(timer);
-        }
-        if (!accepted) {
-          // Escape / focus loss — restore the filter that was active on open.
-          setRuntimeFilter(original);
-          void applyPathFilter();
-        }
-        input.dispose();
-      });
-      input.show();
-    }),
-
-    vscode.commands.registerCommand('cCallHierarchyReferences.clearPathFilter', async () => {
-      setRuntimeFilter(undefined);
-      await applyPathFilter();
-    }),
-
+    // ---- Filter to a folder from the Explorer context menu ----
     vscode.commands.registerCommand('cCallHierarchyReferences.filterToFolder', async (arg?: unknown) => {
       const uri = uriFromArg(arg);
       if (!uri) {
