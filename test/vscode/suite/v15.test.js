@@ -4,6 +4,7 @@
  *  - re-clicking "Open in editor" walks a ×N node's call sites, per-node, with
  *    no walk-state leaking into another node (the v0.1.18 fix)
  *  - pressing Enter walks a ×N node's call sites in-tree, per-node, no leak (v0.1.19)
+ *  - an active search filter highlights the matched part of a call-tree label (v0.1.20)
  *  - References in folder grouping render the top folder levels Expanded
  * Drives the REAL providers exposed by the extension's activate(). */
 const assert = require('assert');
@@ -187,6 +188,43 @@ suite(`v0.1.15 features [${PROVIDER}]`, () => {
       const b = await enter(one);
       assert.deepStrictEqual(b, { index: 0, total: 1 }, 'single-site node: Enter stays at 1/1');
       console.log('  single-site nodes: Enter stays at 1/1 ✔');
+    }
+  });
+
+  test('Active filter highlights the matched part of a call-tree node label (v0.1.20)', async function () {
+    this.timeout(180000);
+    assert.strictEqual(typeof api.setFilter, 'function', 'activate() exposes setFilter for tests');
+
+    const rootNode = await dispatchRoots(tree);
+    if (tree.getDirection() !== 'outgoing') tree.toggleDirection();
+    const callees = await tree.getChildren(rootNode);
+    const bus = callees.find((n) => /bus/i.test(n.item.name)); // e.g. bus_write / bus_read
+    const noBus = callees.find((n) => !/bus/i.test(n.item.name));
+
+    try {
+      api.setFilter('bus');
+      if (bus) {
+        const ti = await tree.getTreeItem(bus);
+        assert.ok(ti.label && typeof ti.label === 'object', 'matching node label is a TreeItemLabel');
+        assert.ok(
+          Array.isArray(ti.label.highlights) && ti.label.highlights.length > 0,
+          'matching node carries highlight ranges',
+        );
+        const [s, e] = ti.label.highlights[0];
+        assert.strictEqual(
+          ti.label.label.slice(s, e).toLowerCase(),
+          'bus',
+          'the highlight range covers the matched "bus"',
+        );
+        console.log(`  ${ti.label.label}: highlight [${s},${e}] = "${ti.label.label.slice(s, e)}" ✔`);
+      }
+      if (noBus) {
+        const ti2 = await tree.getTreeItem(noBus);
+        assert.strictEqual(typeof ti2.label, 'string', 'a node the filter does not match keeps a plain label');
+        console.log(`  ${noBus.item.name}: no "bus" in name → plain label ✔`);
+      }
+    } finally {
+      api.setFilter(undefined); // don't leak the filter into later tests
     }
   });
 

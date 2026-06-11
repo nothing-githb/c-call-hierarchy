@@ -66,6 +66,9 @@ A fixed **Filter** pane at the top searches by **function name or path** across 
 | `src/net/**` | **glob** |
 | `/drv_\d+/` | **regular expression** |
 
+Matches are also **highlighted in the call tree** — the part of each function name the filter matched is
+tinted, so it's clear at a glance why a node is shown.
+
 ---
 
 ## ✅ Requirements

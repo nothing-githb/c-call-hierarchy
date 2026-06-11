@@ -5,7 +5,7 @@
  */
 const path = require('path');
 const T = require(path.join(__dirname, '..', 'out', 'textutil.js'));
-const { RefKind, isAddressOf, heuristicKind, matchGlob, matchesQuery, nextSiteIndex } = T;
+const { RefKind, isAddressOf, heuristicKind, matchGlob, matchesQuery, nextSiteIndex, queryHighlights } = T;
 
 let fail = 0;
 function eq(actual, expected, msg) {
@@ -152,6 +152,19 @@ console.log('# call-site cursor (×N walk — per-node, no leak)');
   eq(nextSiteIndex({ key: A, index: 0 }, A, 3).index, 1, 'seeded at 0 (arrow preview) → first Enter → site 2');
   eq(nextSiteIndex({ key: A, index: 1 }, A, 3).index, 2, 'next Enter → site 3');
 }
+
+console.log('# query highlights (filter-match emphasis in the call tree)');
+eq(queryHighlights('bus_write', 'bus'), [[0, 3]], 'contains at start → [0,3]');
+eq(queryHighlights('bus_write', 'BUS'), [[0, 3]], 'contains is case-insensitive');
+eq(queryHighlights('bus_write', 'write'), [[4, 9]], 'contains mid-name → [4,9]');
+eq(queryHighlights('banana', 'a'), [[1, 2], [3, 4], [5, 6]], 'all occurrences highlighted');
+eq(queryHighlights('bus_write', 'xyz'), [], 'no match → []');
+eq(queryHighlights('drv_3', '/drv_\\d+/'), [[0, 5]], 'regex /drv_\\d+/ → [0,5]');
+eq(queryHighlights('a1b2', '/\\d/'), [[1, 2], [3, 4]], 'regex matches all (implicit g)');
+eq(queryHighlights('bus_write', 'bus*'), [], 'glob → [] (matches path, not a name substring)');
+eq(queryHighlights('bus_write', ''), [], 'empty query → []');
+eq(queryHighlights('', 'bus'), [], 'empty text → []');
+eq(queryHighlights('bus', '/[/'), [], 'malformed regex → []');
 
 console.log(fail === 0 ? `\nALL PASS (logic)` : `\n${fail} FAILED`);
 process.exit(fail ? 1 : 0);

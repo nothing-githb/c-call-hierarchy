@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as h from './hierarchy';
-import { passesFilter, matchesRuntimeFilter, maxDepth } from './filter';
+import { passesFilter, matchesRuntimeFilter, maxDepth, getRuntimeFilter } from './filter';
+import { queryHighlights } from './textutil';
 
 function showSignatures(): boolean {
   return vscode.workspace.getConfiguration('cCallHierarchyReferences').get<boolean>('showSignatures', true);
@@ -102,8 +103,12 @@ export class CallTreeProvider implements vscode.TreeDataProvider<CallNode> {
     const item = node.item;
     const recursive = node.ancestry.has(node.key);
     const leaf = node.kind === 'call' && (node.depth >= maxDepth() || recursive);
+    // When a search filter is active, tint the part of the name it matches (the
+    // standard list filter-match highlight) so it's clear *why* a node is shown.
+    const query = getRuntimeFilter();
+    const hl = query ? queryHighlights(item.name, query) : [];
     const ti = new vscode.TreeItem(
-      item.name,
+      hl.length ? { label: item.name, highlights: hl } : item.name,
       node.kind === 'root'
         ? vscode.TreeItemCollapsibleState.Expanded
         : leaf

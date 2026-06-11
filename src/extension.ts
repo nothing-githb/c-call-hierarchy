@@ -12,7 +12,11 @@ import {
 
 export function activate(
   context: vscode.ExtensionContext,
-): { tree: CallTreeProvider; references: ReferencesProvider } {
+): {
+  tree: CallTreeProvider;
+  references: ReferencesProvider;
+  setFilter: (query?: string) => void;
+} {
   initFilterState(context);
 
   // --- Call hierarchy view ---
@@ -327,8 +331,17 @@ export function activate(
   // Restore the persisted path-filter indicator on startup.
   void applyPathFilter();
 
-  // Exposed for integration tests to drive the real providers.
-  return { tree, references: refProvider };
+  // Exposed for integration tests to drive the real providers. `setFilter`
+  // applies the runtime search filter (normally typed in the Filter pane) so
+  // tests can assert filter-dependent rendering like the match highlight.
+  return {
+    tree,
+    references: refProvider,
+    setFilter: (query?: string) => {
+      setRuntimeFilter(query);
+      void applyPathFilter();
+    },
+  };
 }
 
 function symbolNameAt(editor: vscode.TextEditor): string {

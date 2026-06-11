@@ -230,6 +230,59 @@ function globToRegExp(glob: string): RegExp {
   return new RegExp('^' + re + '$');
 }
 
+/**
+ * Ranges of `text` (a symbol name) that the search `query` matches, for
+ * highlighting in a tree label. `[start, end)` pairs, left-to-right,
+ * non-overlapping. A plain query highlights every case-insensitive occurrence;
+ * a `/regex/flags` query highlights each match in the name. A glob matches the
+ * whole *path* (not a substring of the name), so it highlights nothing. Empty
+ * when there is no match — callers fall back to a plain string label.
+ */
+export function queryHighlights(text: string, query: string): [number, number][] {
+  if (!text || !query) {
+    return [];
+  }
+  const isRegex = /^\/.*\/[a-zA-Z]*$/.test(query);
+  const isGlob = !isRegex && /[*?]/.test(query);
+  if (isRegex) {
+    const m = query.match(/^\/(.*)\/([a-zA-Z]*)$/);
+    if (!m) {
+      return [];
+    }
+    let rx: RegExp;
+    try {
+      rx = new RegExp(m[1], m[2].includes('g') ? m[2] : m[2] + 'g');
+    } catch {
+      return []; // malformed regex → no highlight
+    }
+    const out: [number, number][] = [];
+    let match: RegExpExecArray | null;
+    let guard = 0;
+    while ((match = rx.exec(text)) !== null && guard++ < 1000) {
+      if (match[0].length === 0) {
+        rx.lastIndex++; // zero-width match → avoid an infinite loop
+        continue;
+      }
+      out.push([match.index, match.index + match[0].length]);
+    }
+    return out;
+  }
+  if (isGlob) {
+    return [];
+  }
+  const q = query.toLowerCase();
+  const lower = text.toLowerCase();
+  const out: [number, number][] = [];
+  let i = lower.indexOf(q);
+  while (i !== -1 && out.length < 1000) {
+    // Cap matches as the regex branch does — a symbol name never has 1000
+    // occurrences, so this only bounds pathological input.
+    out.push([i, i + q.length]);
+    i = lower.indexOf(q, i + q.length);
+  }
+  return out;
+}
+
 /** Match `query` against any candidate (name / path): regex, glob, or contains. */
 export function matchesQuery(query: string, candidates: string[]): boolean {
   if (!query) {

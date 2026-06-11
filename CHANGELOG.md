@@ -3,6 +3,14 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.20]
+
+### Added
+- **Filter matches are highlighted in the call tree.** When you type in the **Filter** pane, the part of
+  each call-tree function name the query matches is tinted (the standard list match-highlight) — so it's
+  clear at a glance why a node is shown. Works for plain **contains** queries (every occurrence) and
+  `/regex/` queries; glob queries match the path, so nothing in the name is highlighted.
+
 ## [0.1.19]
 
 ### Added
@@ -208,6 +216,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.20]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.20
 [0.1.19]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.19
 [0.1.18]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.18
 [0.1.17]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.17

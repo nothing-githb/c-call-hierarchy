@@ -35,16 +35,62 @@ function findCode() {
   ].find((p) => fs.existsSync(p));
 }
 
+// A VS Code build already downloaded by @vscode/test-electron, used DIRECTLY so
+// we never hit the network — downloadAndUnzipVSCode('insiders'/'stable') makes a
+// "latest version" request that can ECONNRESET behind a firewall and crash a
+// release. Returns the cached executable path, or undefined if none is cached.
+function findCachedVSCode() {
+  const base = path.join(path.resolve(__dirname, '..', '..'), '.vscode-test');
+  let entries;
+  try {
+    entries = fs.readdirSync(base).filter((d) => d.startsWith('vscode-'));
+  } catch {
+    return undefined; // no cache dir yet
+  }
+  const exeNames =
+    process.platform === 'win32'
+      ? ['Code.exe', 'Code - Insiders.exe']
+      : process.platform === 'darwin'
+        ? ['Visual Studio Code.app/Contents/MacOS/Electron', 'Visual Studio Code - Insiders.app/Contents/MacOS/Electron']
+        : ['code', 'code-insiders', 'VSCode-linux-x64/code', 'VSCode-linux-x64/code-insiders'];
+  for (const d of entries) {
+    for (const exe of exeNames) {
+      const p = path.join(base, d, exe);
+      if (fs.existsSync(p)) return p;
+    }
+  }
+  return undefined;
+}
+
+// True until the VS Code process is actually launched. While still acquiring VS
+// Code, a NETWORK error (e.g. the firewall RST-ing the version check) should SKIP
+// the suite (exit 0) — even if it surfaces as an unhandled socket error rather
+// than a rejected promise — instead of failing the release. Once tests are
+// running, every failure is real and must exit non-zero.
+let testsStarted = false;
+const NET_CODES = ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED', 'EPIPE'];
+function onFatal(err) {
+  const code = err && (err.code || (err.cause && err.cause.code));
+  if (!testsStarted && NET_CODES.includes(code)) {
+    console.log(`SKIP vscode integration: network error obtaining VS Code (${code}).`);
+    process.exit(0);
+  }
+  console.error(`vscode integration (${PROVIDER}) FAILED:`, err && err.message ? err.message : err);
+  process.exit(1);
+}
+process.on('uncaughtException', onFatal);
+process.on('unhandledRejection', onFatal);
+
 async function main() {
   const repo = path.resolve(__dirname, '..', '..');
   const exampleLarge = path.join(repo, 'example-large');
-  // Use the user's installed Code only when asked (USE_INSTALLED=1); otherwise
-  // download a clean instance — avoids the "Code is being updated" lock from
-  // launching the running install. Resolve the executable up front so a DOWNLOAD
-  // failure (offline / firewalled — e.g. inside `vsce package`'s prepublish on a
-  // locked-down box) SKIPS the suite (exit 0) instead of failing the release; a
-  // real TEST failure further down still exits non-zero.
-  let code = process.env.USE_INSTALLED ? findCode() : undefined;
+  // Prefer a build already cached by @vscode/test-electron (no network); else the
+  // user's installed Code when asked (USE_INSTALLED=1); else download a clean
+  // instance — avoids the "Code is being updated" lock from launching the running
+  // install. A DOWNLOAD failure (offline / firewalled — e.g. inside `vsce
+  // package`'s prepublish on a locked-down box) SKIPS the suite (exit 0) instead
+  // of failing the release; a real TEST failure further down still exits non-zero.
+  let code = process.env.USE_INSTALLED ? findCode() : findCachedVSCode();
   if (!code) {
     try {
       code = await downloadAndUnzipVSCode(process.env.VSCODE_VERSION || 'stable');
@@ -92,8 +138,9 @@ async function main() {
   const userExt = path.join(os.homedir(), '.vscode', 'extensions');
 
   console.log(`=== provider: ${PROVIDER}${process.env.VSCODE_VERSION ? ' @ ' + process.env.VSCODE_VERSION : ''} ===`);
+  testsStarted = true; // from here on, any failure is a real test failure (exit 1)
   await runTests({
-    vscodeExecutablePath: code, // resolved above (installed or downloaded)
+    vscodeExecutablePath: code, // resolved above (cached / installed / downloaded)
     extensionDevelopmentPath: repo,
     extensionTestsPath: path.join(__dirname, 'suite', 'index.js'),
     extensionTestsEnv: { PROVIDER },
@@ -115,7 +162,4 @@ async function main() {
   });
 }
 
-main().catch((e) => {
-  console.error(`vscode integration (${PROVIDER}) FAILED:`, e && e.message ? e.message : e);
-  process.exit(1);
-});
+main().catch(onFatal);
