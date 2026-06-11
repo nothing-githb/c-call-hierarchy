@@ -2,7 +2,7 @@
   "name": "c-call-hierarchy-references",
   "displayName": "C Call Hierarchy & References",
   "description": "C/C++ call hierarchy (toggle callers / callees) and read/write find-references — works with clangd (recommended) or Microsoft C/C++.",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "publisher": "halistahasahin",
   "license": "MIT",
   "author": {
@@ -98,6 +98,11 @@
         "icon": "$(go-to-file)"
       },
       {
+        "command": "cCallHierarchyReferences.nextCallSite",
+        "title": "Next call site (Enter walks a ×N node's call sites)",
+        "category": "C Call Hierarchy & References"
+      },
+      {
         "command": "cCallHierarchyReferences.refresh",
         "title": "Refresh call hierarchy",
         "category": "C Call Hierarchy & References",
@@ -144,6 +149,13 @@
         "title": "Filter to this folder",
         "category": "C Call Hierarchy & References",
         "icon": "$(filter)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "cCallHierarchyReferences.nextCallSite",
+        "key": "enter",
+        "when": "focusedView == cCallHierarchyReferences.tree && cCallHierarchyReferences.selectedMulti"
       }
     ],
     "menus": {
@@ -237,7 +249,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile && npm test && npm run test:clangd",
+    "vscode:prepublish": "npm run compile && npm test && npm run test:clangd && npm run test:vscode",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "node test/logic.test.js",

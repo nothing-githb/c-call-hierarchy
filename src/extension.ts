@@ -71,11 +71,34 @@ export function activate(
     }, 1500);
   };
 
-  // Cursor for walking a ×N node's merged call sites. Each "Open in editor" on a
-  // node steps to the NEXT site (wrapping); the cursor is keyed to the node, so
-  // invoking it on a different node restarts from that node's first site — the
-  // walk state never leaks between nodes (see nextSiteIndex).
+  // Per-node cursors for walking a ×N node's merged call sites. `nextSiteIndex`
+  // keys each step on the node, so a walk NEVER leaks into another node — acting
+  // on a different node always restarts from its first site.
+  //   openCursor  — the inline "Open in editor" action: each click opens the next
+  //                 site for real (focus moves to the editor).
+  //   enterCursor — the keyboard Enter walk: each press previews the next site
+  //                 while focus stays in the tree. Seeded to the selected node
+  //                 (index 0 = the site the arrow-preview already shows) on every
+  //                 selection change, so the first Enter advances to the next site.
+  const cursorKey = (node: CallNode): string =>
+    `${node.key}|${(node.callUri ?? node.item.uri).toString()}`;
   let openCursor: { key: string; index: number } | undefined;
+  let enterCursor: { key: string; index: number } | undefined;
+
+  // Pin the Enter-walk cursor to the selected node and flag ×N selections, so the
+  // Enter keybinding only overrides Enter on a node that actually has sites to
+  // walk. Both keep Enter acting on the CURRENTLY selected node — never a stale one.
+  context.subscriptions.push(
+    callView.onDidChangeSelection((e) => {
+      const sel = e.selection[0];
+      enterCursor = sel ? { key: cursorKey(sel), index: 0 } : undefined;
+      void vscode.commands.executeCommand(
+        'setContext',
+        'cCallHierarchyReferences.selectedMulti',
+        (sel?.fromRanges.length ?? 0) > 1,
+      );
+    }),
+  );
 
   let filterPanel: FilterPanelProvider | undefined;
 
@@ -171,8 +194,7 @@ export function activate(
       async (node: CallNode): Promise<{ index: number; total: number }> => {
         const sites = node.fromRanges;
         const hasSites = !!node.callUri && sites.length > 0;
-        const key = `${node.key}|${(node.callUri ?? node.item.uri).toString()}`;
-        const r = nextSiteIndex(openCursor, key, hasSites ? sites.length : 1);
+        const r = nextSiteIndex(openCursor, cursorKey(node), hasSites ? sites.length : 1);
         openCursor = { key: r.key, index: r.index };
         const target = hasSites
           ? { uri: node.callUri!, range: sites[r.index] }
@@ -181,6 +203,32 @@ export function activate(
           vscode.window.setStatusBarMessage(`Call site ${r.index + 1} / ${r.total}`, 2500);
         }
         await revealAt(target.uri, target.range, { preserveFocus: false, preview: false });
+        return { index: r.index, total: r.total };
+      },
+    ),
+    // Keyboard Enter on a ×N node walks its merged call sites — one per press,
+    // wrapping — previewing each while focus stays in the tree (bound to Enter via
+    // a keybinding gated on `selectedMulti`). Reads the SELECTED node (or an
+    // explicit node, for tests) + the per-node enterCursor, so arrowing to another
+    // node and pressing Enter walks THAT node, never the previously walked one.
+    vscode.commands.registerCommand(
+      'cCallHierarchyReferences.nextCallSite',
+      async (node?: CallNode): Promise<{ index: number; total: number } | undefined> => {
+        const target = node ?? callView.selection[0];
+        if (!target) {
+          return undefined;
+        }
+        const sites = target.fromRanges;
+        const hasSites = !!target.callUri && sites.length > 0;
+        const r = nextSiteIndex(enterCursor, cursorKey(target), hasSites ? sites.length : 1);
+        enterCursor = { key: r.key, index: r.index };
+        const loc = hasSites
+          ? { uri: target.callUri!, range: sites[r.index] }
+          : nodeTarget(target);
+        if (r.total > 1) {
+          vscode.window.setStatusBarMessage(`Call site ${r.index + 1} / ${r.total}`, 2500);
+        }
+        await revealAt(loc.uri, loc.range, { preserveFocus: true, preview: true });
         return { index: r.index, total: r.total };
       },
     ),

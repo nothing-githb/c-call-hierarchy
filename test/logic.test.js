@@ -147,6 +147,10 @@ console.log('# call-site cursor (×N walk — per-node, no leak)');
   eq(nextSiteIndex(undefined, A, 1).index, 0, 'single site → 0');
   eq(nextSiteIndex({ key: A, index: 0 }, A, 1).index, 0, 'single site stays at 0');
   eq(nextSiteIndex({ key: B, index: 5 }, A, 0).index, 0, 'no sites (total 0) → 0');
+  // Enter-walk seeding: a selection change seeds {key, 0} (the arrow-preview
+  // already shows site 0), so the FIRST Enter advances to site 1, the next to 2.
+  eq(nextSiteIndex({ key: A, index: 0 }, A, 3).index, 1, 'seeded at 0 (arrow preview) → first Enter → site 2');
+  eq(nextSiteIndex({ key: A, index: 1 }, A, 3).index, 2, 'next Enter → site 3');
 }
 
 console.log(fail === 0 ? `\nALL PASS (logic)` : `\n${fail} FAILED`);

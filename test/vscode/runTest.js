@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { spawnSync } = require('child_process');
-const { runTests } = require('@vscode/test-electron');
+const { runTests, downloadAndUnzipVSCode } = require('@vscode/test-electron');
 
 const PROVIDER = (process.env.PROVIDER || 'clangd').toLowerCase();
 
@@ -39,9 +39,20 @@ async function main() {
   const repo = path.resolve(__dirname, '..', '..');
   const exampleLarge = path.join(repo, 'example-large');
   // Use the user's installed Code only when asked (USE_INSTALLED=1); otherwise
-  // let @vscode/test-electron download a clean instance — avoids the "Code is
-  // being updated" lock from launching the running install.
-  const code = process.env.USE_INSTALLED ? findCode() : undefined;
+  // download a clean instance — avoids the "Code is being updated" lock from
+  // launching the running install. Resolve the executable up front so a DOWNLOAD
+  // failure (offline / firewalled — e.g. inside `vsce package`'s prepublish on a
+  // locked-down box) SKIPS the suite (exit 0) instead of failing the release; a
+  // real TEST failure further down still exits non-zero.
+  let code = process.env.USE_INSTALLED ? findCode() : undefined;
+  if (!code) {
+    try {
+      code = await downloadAndUnzipVSCode(process.env.VSCODE_VERSION || 'stable');
+    } catch (e) {
+      console.log(`SKIP vscode integration: could not obtain VS Code (${e && e.message ? e.message : e}).`);
+      return;
+    }
+  }
 
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cch-ud-'));
   fs.mkdirSync(path.join(userData, 'User'), { recursive: true });
@@ -82,8 +93,7 @@ async function main() {
 
   console.log(`=== provider: ${PROVIDER}${process.env.VSCODE_VERSION ? ' @ ' + process.env.VSCODE_VERSION : ''} ===`);
   await runTests({
-    vscodeExecutablePath: code,
-    version: process.env.VSCODE_VERSION, // dodge the install-mutex of the running install
+    vscodeExecutablePath: code, // resolved above (installed or downloaded)
     extensionDevelopmentPath: repo,
     extensionTestsPath: path.join(__dirname, 'suite', 'index.js'),
     extensionTestsEnv: { PROVIDER },
