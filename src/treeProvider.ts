@@ -145,14 +145,16 @@ export class CallTreeProvider implements vscode.TreeDataProvider<CallNode> {
     }
     ti.tooltip = tip;
 
-    // Select → preview the call site (or, for the root, the definition); focus
-    // stays in the tree so you can keep browsing. The inline action opens it for
-    // real (see nodeTarget for how the location is chosen).
-    const t = nodeTarget(node);
+    // Activating a node (Enter or click) runs ITS OWN command with the node baked
+    // in. VS Code invokes the FOCUSED item's command on Enter, so arrowing to a
+    // node and pressing Enter acts on THAT node — no keybinding, no stale
+    // selection. A ×N node steps to its next merged call site each press
+    // (wrapping); any other node previews its call site / definition. Focus stays
+    // in the tree; the inline action opens it for real.
     ti.command = {
-      command: 'cCallHierarchyReferences.openReference',
+      command: 'cCallHierarchyReferences.nextCallSite',
       title: 'Open',
-      arguments: [t.uri, t.range],
+      arguments: [node],
     };
     // `...Multi` marks a ×N node (several merged call sites): its inline "Open in
     // editor" action walks the sites, one per click. (Informational marker — the

@@ -11,6 +11,14 @@ const PROVIDER_EXT =
   PROVIDER === 'cpptools' ? 'ms-vscode.cpptools' : 'llvm-vs-code-extensions.vscode-clangd';
 const bareName = (n) => n.replace(/\(.*$/, '').replace(/.*[\s:*&]/, '').trim();
 
+// The call-tree node command is nextCallSite([node]); derive its target.
+function nodeTarget(node) {
+  const hasCall = node.fromRanges.length > 0 && !!node.callUri;
+  return hasCall
+    ? { uri: node.callUri, range: node.fromRanges[0] }
+    : { uri: node.item.uri, range: node.item.selectionRange };
+}
+
 suite(`macro-hidden calls [${PROVIDER}]`, () => {
   test('mac_user: calls hidden in macros resolve as callees', async function () {
     this.timeout(240000);
@@ -48,7 +56,7 @@ suite(`macro-hidden calls [${PROVIDER}]`, () => {
     const found = {};
     for (const n of callees) {
       const name = bareName(n.item.name);
-      const [u, range] = (await tree.getTreeItem(n)).command.arguments;
+      const { uri: u, range } = nodeTarget((await tree.getTreeItem(n)).command.arguments[0]);
       const d = await vscode.workspace.openTextDocument(u);
       (found[name] = found[name] || []).push({
         file: u.fsPath.split(/[\\/]/).pop(),

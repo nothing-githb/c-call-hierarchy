@@ -81,27 +81,15 @@ export function activate(
   // on a different node always restarts from its first site.
   //   openCursor  — the inline "Open in editor" action: each click opens the next
   //                 site for real (focus moves to the editor).
-  //   enterCursor — the keyboard Enter walk: each press previews the next site
-  //                 while focus stays in the tree. Seeded to the selected node
-  //                 (index 0 = the site the arrow-preview already shows) on every
-  //                 selection change, so the first Enter advances to the next site.
+  //   enterCursor — activating a node (Enter or click) steps to its next call
+  //                 site, previewing while focus stays in the tree. The node's own
+  //                 command (nextCallSite) drives this, keyed per node, so the
+  //                 first activation of a node lands on its first site and a walk
+  //                 never leaks into another node.
   const cursorKey = (node: CallNode): string =>
     `${node.key}|${(node.callUri ?? node.item.uri).toString()}`;
   let openCursor: { key: string; index: number } | undefined;
   let enterCursor: { key: string; index: number } | undefined;
-
-  // Pin the Enter-walk cursor to the selected node (index 0 = the site the
-  // arrow-preview shows) on every selection change, so the first Enter advances
-  // to the next site and Enter always acts on the CURRENTLY selected node — never
-  // a stale one. (The Enter keybinding fires for the whole tree, not gated on a
-  // context key, so there's no async-context-key window where Enter could act on
-  // the wrong node.)
-  context.subscriptions.push(
-    callView.onDidChangeSelection((e) => {
-      const sel = e.selection[0];
-      enterCursor = sel ? { key: cursorKey(sel), index: 0 } : undefined;
-    }),
-  );
 
   let filterPanel: FilterPanelProvider | undefined;
 
@@ -209,13 +197,13 @@ export function activate(
         return { index: r.index, total: r.total };
       },
     ),
-    // Enter in the call tree acts on the SELECTED node (Enter is bound to this
-    // for the whole tree): a ×N node walks its merged call sites one per press,
-    // wrapping; any other node previews its call site / definition. Either way it
-    // previews while focus stays in the tree. Reads callView.selection (or an
-    // explicit node, for tests) + the per-node enterCursor, so arrowing to another
-    // node and pressing Enter acts on THAT node, never the previously walked one.
-    // Returns the resolved target so tests can assert which node Enter landed on.
+    // The call-tree node's command (set as TreeItem.command, so VS Code runs it
+    // for the FOCUSED node on Enter — and on click). A ×N node steps to its next
+    // merged call site each activation, wrapping; any other node previews its call
+    // site / definition. Either way it previews while focus stays in the tree. The
+    // node is passed as the argument (so it acts on the node the user is on, not a
+    // stale selection); the per-node enterCursor keys the walk so it never leaks
+    // into another node. Returns the resolved target so tests can assert it.
     vscode.commands.registerCommand(
       'cCallHierarchyReferences.nextCallSite',
       async (

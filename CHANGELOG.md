@@ -3,6 +3,16 @@
 All notable changes to **C Call Hierarchy & References** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.24]
+
+### Changed
+- **Enter now acts on the node you're on — including via the arrow keys.** The Enter-walk no longer goes
+  through a keybinding that read the (arrow-stale) selection. Instead each call-tree node's **own command**
+  runs, which VS Code invokes for the **focused** node on Enter. So arrowing down to a callee and pressing
+  **Enter** goes to that callee's call site; on a **×N** node each Enter steps to the next merged call site
+  (wrapping). Clicking a node does the same. (This restores the pre-0.1.17 "Enter runs the focused node's
+  command" behaviour, with the ×N stepping layered on top.)
+
 ## [0.1.23]
 
 ### Fixed
@@ -244,6 +254,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - Fixed **Filter** pane: live search by **name or path** (contains / glob / `/regex/`) across all views,
   plus `excludeGlobs` / `includeGlobs` settings.
 
+[0.1.24]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.24
+[0.1.23]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.23
 [0.1.21]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.21
 [0.1.20]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.20
 [0.1.19]: https://github.com/nothing-githb/c-call-hierarchy-references/releases/tag/v0.1.19

@@ -15,6 +15,14 @@ const PROVIDER_EXT =
   PROVIDER === 'cpptools' ? 'ms-vscode.cpptools' : 'llvm-vs-code-extensions.vscode-clangd';
 const bareName = (n) => n.replace(/\(.*$/, '').replace(/.*[\s:*&]/, '').trim();
 
+// The call-tree node command is nextCallSite([node]); derive the uri+range it opens.
+function nodeTarget(node) {
+  const hasCall = node.fromRanges.length > 0 && !!node.callUri;
+  return hasCall
+    ? { uri: node.callUri, range: node.fromRanges[0] }
+    : { uri: node.item.uri, range: node.item.selectionRange };
+}
+
 let tree;
 async function getTree() {
   if (tree) return tree;
@@ -53,8 +61,8 @@ async function showHierarchyAt(fileUri, findPos) {
 }
 
 async function lineAtCmd(cmdArgs) {
-  const [uri, range] = cmdArgs;
-  assert.ok(uri instanceof vscode.Uri && range && range.start, 'command args are [Uri, Range]');
+  const { uri, range } = nodeTarget(cmdArgs[0]);
+  assert.ok(uri instanceof vscode.Uri && range && range.start, 'node target is a Uri + Range');
   const d = await vscode.workspace.openTextDocument(uri);
   return { uri, line: d.lineAt(range.start.line).text, lineNo: range.start.line + 1 };
 }

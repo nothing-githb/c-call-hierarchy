@@ -17,6 +17,16 @@ function bareName(name) {
   return name.replace(/\(.*$/, '').replace(/.*[\s:*&]/, '').trim();
 }
 
+// The call-tree node's command is nextCallSite([node]) (so Enter acts on the
+// focused node); derive the uri+range it opens from the node, mirroring the
+// extension's nodeTarget().
+function nodeTarget(node) {
+  const hasCall = node.fromRanges.length > 0 && !!node.callUri;
+  return hasCall
+    ? { uri: node.callUri, range: node.fromRanges[0] }
+    : { uri: node.item.uri, range: node.item.selectionRange };
+}
+
 suite(`real CallTreeProvider — click targets [${PROVIDER}]`, () => {
   test('root → definition, caller → call site, callee → call site', async function () {
     this.timeout(240000);
@@ -46,11 +56,12 @@ suite(`real CallTreeProvider — click targets [${PROVIDER}]`, () => {
     tree.setRoots(items);
     const rootNode = tree.getRoots()[0];
 
-    // helper: read the file line a [uri, range] command argument points at
+    // helper: read the file line a node's command target points at (the command
+    // arg is [node]; nodeTarget derives the uri+range it opens).
     async function lineAt(cmdArgs) {
-      const [uri, range] = cmdArgs;
-      assert.ok(uri instanceof vscode.Uri, 'first arg is a Uri');
-      assert.ok(range && range.start, 'second arg is a Range');
+      const { uri, range } = nodeTarget(cmdArgs[0]);
+      assert.ok(uri instanceof vscode.Uri, 'target uri is a Uri');
+      assert.ok(range && range.start, 'target has a Range');
       const d = await vscode.workspace.openTextDocument(uri);
       return { uri, line: d.lineAt(range.start.line).text, lineNo: range.start.line + 1 };
     }
@@ -148,7 +159,7 @@ suite(`real CallTreeProvider — click targets [${PROVIDER}]`, () => {
     assert.ok(busRead, `bus_read is a callee (got: ${callees.map((c) => c.item.name).join(', ')})`);
 
     const ti = await tree.getTreeItem(busRead);
-    const [u, range] = ti.command.arguments;
+    const { uri: u, range } = nodeTarget(ti.command.arguments[0]);
     const tdoc = await vscode.workspace.openTextDocument(u);
     const line = tdoc.lineAt(range.start.line).text;
     console.log(`  bus_read click → ${u.fsPath.split(/[\\/]/).pop()}:${range.start.line + 1} "${line.trim()}"`);
@@ -190,7 +201,7 @@ suite(`real CallTreeProvider — click targets [${PROVIDER}]`, () => {
     assert.ok(callees.length > 0, 'dispatch has callees');
 
     const node = callees[0];
-    const [expUri, expRange] = (await t.getTreeItem(node)).command.arguments;
+    const { uri: expUri, range: expRange } = nodeTarget((await t.getTreeItem(node)).command.arguments[0]);
     await vscode.commands.executeCommand('cCallHierarchyReferences.openReferenceInEditor', node);
 
     const ed = vscode.window.activeTextEditor;
